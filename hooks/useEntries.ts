@@ -1,0 +1,59 @@
+// Powered by OnSpace.AI
+import { useState, useEffect, useCallback } from 'react';
+import { ExtractedData, dateToSortKey } from '@/services/extractionService';
+import { loadEntries, saveEntries } from '@/services/storageService';
+
+export interface Entry {
+  id: string;
+  date: string | null;
+  amount: string | null;
+  sayyadId: string | null;
+  name: string | null;
+  nationalCode: string | null;
+  rawText: string;
+  createdAt: number;
+}
+
+export function useEntries() {
+  const [entries, setEntries] = useState<Entry[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadEntries().then((stored) => {
+      setEntries(stored);
+      setLoading(false);
+    });
+  }, []);
+
+  const addEntry = useCallback(async (data: ExtractedData) => {
+    const newEntry: Entry = {
+      id: Date.now().toString(),
+      ...data,
+      createdAt: Date.now(),
+    };
+    const updated = [...entries, newEntry];
+    setEntries(updated);
+    await saveEntries(updated);
+    return newEntry;
+  }, [entries]);
+
+  const deleteEntry = useCallback(async (id: string) => {
+    const updated = entries.filter((e) => e.id !== id);
+    setEntries(updated);
+    await saveEntries(updated);
+  }, [entries]);
+
+  const sortedEntries = [...entries].sort((a, b) => {
+    const aKey = a.date ? dateToSortKey(a.date) : 0;
+    const bKey = b.date ? dateToSortKey(b.date) : 0;
+    if (bKey !== aKey) return bKey - aKey;
+    return b.createdAt - a.createdAt;
+  });
+
+  return {
+    entries: sortedEntries,
+    loading,
+    addEntry,
+    deleteEntry,
+  };
+}
