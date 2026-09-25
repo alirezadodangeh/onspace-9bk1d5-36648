@@ -1,6 +1,6 @@
 // Powered by OnSpace.AI
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Entry } from '@/hooks/useEntries';
+import { Entry } from '@/services/extractionService';
 
 const STORAGE_KEY = '@sayyad_entries';
 

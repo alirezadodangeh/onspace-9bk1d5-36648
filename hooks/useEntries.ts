@@ -1,19 +1,9 @@
 // Powered by OnSpace.AI
 import { useState, useEffect, useCallback } from 'react';
-import { ExtractedData, dateToSortKey } from '@/services/extractionService';
+import { Entry, ExtractedData, dateToSortKey } from '@/services/extractionService';
 import { loadEntries, saveEntries } from '@/services/storageService';
 
-export interface Entry {
-  id: string;
-  date: string | null;
-  amount: string | null;
-  sayyadId: string | null;
-  name: string | null;
-  nationalCode: string | null;
-  checkSerial: string | null;
-  rawText: string;
-  createdAt: number;
-}
+export type { Entry };
 
 export function useEntries() {
   const [entries, setEntries] = useState<Entry[]>([]);

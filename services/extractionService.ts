@@ -1,5 +1,17 @@
 // Powered by OnSpace.AI
 
+export interface Entry {
+  id: string;
+  date: string | null;
+  amount: string | null;
+  sayyadId: string | null;
+  name: string | null;
+  nationalCode: string | null;
+  checkSerial: string | null;
+  rawText: string;
+  createdAt: number;
+}
+
 export interface ExtractedData {
   date: string | null;
   amount: string | null;
