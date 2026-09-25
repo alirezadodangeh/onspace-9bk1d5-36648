@@ -25,7 +25,7 @@ interface Props {
 interface FieldConfig {
   key: keyof Omit<Entry, 'id' | 'createdAt' | 'rawText'>;
   label: string;
-  icon: keyof typeof MaterialIcons.glyphMap;
+  icon: string;
   color: string;
   bg: string;
   placeholder: string;
@@ -129,7 +129,7 @@ export default function EditEntryModal({ visible, entry, onClose, onSave }: Prop
           {/* Header */}
           <View style={styles.header}>
             <Text style={styles.title}>ویرایش آیتم</Text>
-            <Pressable onPress={onClose} hitSlop={8} style={({ pressed }) => [pressed && { opacity: 0.6 }]}>
+            <Pressable onPress={onClose} hitSlop={8} style={({ pressed }) => (pressed ? { opacity: 0.6 } : {})}>
               <MaterialIcons name="close" size={24} color={Colors.textSecondary} />
             </Pressable>
           </View>

@@ -25,7 +25,7 @@ interface Props {
 interface PreviewField {
   label: string;
   value: string | null;
-  icon: keyof typeof MaterialIcons.glyphMap;
+  icon: string;
   color: string;
   bg: string;
 }
