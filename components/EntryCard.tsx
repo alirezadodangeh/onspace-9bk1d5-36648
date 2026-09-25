@@ -20,7 +20,7 @@ interface Props {
 function formatAmount(amount: string): string {
   const num = parseInt(amount.replace(/,/g, ''), 10);
   if (isNaN(num)) return amount;
-  return num.toLocaleString('fa-IR');
+  return num.toLocaleString();
 }
 
 function EntryCard({ entry, onDelete, onEdit }: Props) {
