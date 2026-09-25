@@ -9,7 +9,7 @@ import {
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Colors, Spacing, BorderRadius, FontSize, Shadow } from '@/constants/theme';
-import { Entry } from '@/hooks/useEntries';
+import type { Entry } from '@/hooks/useEntries';
 
 interface Props {
   entry: Entry;

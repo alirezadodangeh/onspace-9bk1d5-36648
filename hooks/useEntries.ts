@@ -1,6 +1,7 @@
 // Powered by OnSpace.AI
 import { useState, useEffect, useCallback } from 'react';
-import { Entry, ExtractedData, dateToSortKey } from '@/services/extractionService';
+import type { Entry, ExtractedData } from '@/services/extractionService';
+import { dateToSortKey } from '@/services/extractionService';
 import { loadEntries, saveEntries } from '@/services/storageService';
 
 export type { Entry };
