@@ -16,6 +16,8 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { Colors, Spacing, BorderRadius, FontSize, Shadow } from '@/constants/theme';
 import { extractData, ExtractedData } from '@/services/extractionService';
 
+type IconName = React.ComponentProps<typeof MaterialIcons>['name'];
+
 interface Props {
   visible: boolean;
   onClose: () => void;
@@ -25,7 +27,7 @@ interface Props {
 interface PreviewField {
   label: string;
   value: string | null;
-  icon: string;
+  icon: IconName;
   color: string;
   bg: string;
 }

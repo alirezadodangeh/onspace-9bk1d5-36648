@@ -15,6 +15,8 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { Colors, Spacing, BorderRadius, FontSize, Shadow } from '@/constants/theme';
 import { Entry } from '@/hooks/useEntries';
 
+type IconName = React.ComponentProps<typeof MaterialIcons>['name'];
+
 interface Props {
   visible: boolean;
   entry: Entry | null;
@@ -25,7 +27,7 @@ interface Props {
 interface FieldConfig {
   key: keyof Omit<Entry, 'id' | 'createdAt' | 'rawText'>;
   label: string;
-  icon: string;
+  icon: IconName;
   color: string;
   bg: string;
   placeholder: string;
