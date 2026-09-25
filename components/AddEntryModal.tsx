@@ -69,6 +69,13 @@ export default function AddEntryModal({ visible, onClose, onSave }: Props) {
           bg: Colors.accent,
         },
         {
+          label: 'سریال چک',
+          value: extracted.checkSerial,
+          icon: 'receipt-long',
+          color: Colors.check,
+          bg: Colors.checkLight,
+        },
+        {
           label: 'مبلغ',
           value: extracted.amount
             ? parseInt(extracted.amount.replace(/,/g, ''), 10).toLocaleString('fa-IR') + ' ریال'
@@ -102,7 +109,14 @@ export default function AddEntryModal({ visible, onClose, onSave }: Props) {
     : [];
 
   const foundCount = extracted
-    ? [extracted.date, extracted.amount, extracted.sayyadId, extracted.name, extracted.nationalCode].filter(Boolean).length
+    ? [
+        extracted.date,
+        extracted.amount,
+        extracted.sayyadId,
+        extracted.checkSerial,
+        extracted.name,
+        extracted.nationalCode,
+      ].filter(Boolean).length
     : 0;
 
   return (
@@ -125,7 +139,11 @@ export default function AddEntryModal({ visible, onClose, onSave }: Props) {
           {/* Header */}
           <View style={styles.header}>
             <Text style={styles.title}>افزودن آیتم جدید</Text>
-            <Pressable onPress={handleClose} hitSlop={8} style={({ pressed }) => [pressed && { opacity: 0.6 }]}>
+            <Pressable
+              onPress={handleClose}
+              hitSlop={8}
+              style={({ pressed }) => [pressed && { opacity: 0.6 }]}
+            >
               <MaterialIcons name="close" size={24} color={Colors.textSecondary} />
             </Pressable>
           </View>
@@ -145,7 +163,7 @@ export default function AddEntryModal({ visible, onClose, onSave }: Props) {
                 setText(t);
                 if (extracted) setExtracted(null);
               }}
-              placeholder="متن شامل تاریخ، مبلغ، شناسه صیاد و... را اینجا بنویسید یا بچسبانید"
+              placeholder="متن شامل تاریخ، مبلغ، شناسه صیاد، سریال چک و... را اینجا بنویسید یا بچسبانید"
               placeholderTextColor={Colors.textMuted}
               multiline
               numberOfLines={6}
@@ -178,19 +196,26 @@ export default function AddEntryModal({ visible, onClose, onSave }: Props) {
             {extracted ? (
               <View style={styles.preview}>
                 <View style={styles.previewHeader}>
-                  <View style={[
-                    styles.foundBadge,
-                    { backgroundColor: foundCount > 0 ? Colors.successLight : Colors.errorLight }
-                  ]}>
+                  <View
+                    style={[
+                      styles.foundBadge,
+                      {
+                        backgroundColor:
+                          foundCount > 0 ? Colors.successLight : Colors.errorLight,
+                      },
+                    ]}
+                  >
                     <MaterialIcons
                       name={foundCount > 0 ? 'check-circle' : 'info'}
                       size={14}
                       color={foundCount > 0 ? Colors.success : Colors.error}
                     />
-                    <Text style={[
-                      styles.foundText,
-                      { color: foundCount > 0 ? Colors.success : Colors.error }
-                    ]}>
+                    <Text
+                      style={[
+                        styles.foundText,
+                        { color: foundCount > 0 ? Colors.success : Colors.error },
+                      ]}
+                    >
                       {foundCount > 0 ? `${foundCount} فیلد یافت شد` : 'فیلدی یافت نشد'}
                     </Text>
                   </View>
@@ -198,22 +223,29 @@ export default function AddEntryModal({ visible, onClose, onSave }: Props) {
                 </View>
 
                 {fields.map((field) => (
-                  <View key={field.label} style={[
-                    styles.fieldRow,
-                    { backgroundColor: field.value ? field.bg : Colors.borderLight },
-                    !field.value && styles.fieldRowEmpty,
-                  ]}>
+                  <View
+                    key={field.label}
+                    style={[
+                      styles.fieldRow,
+                      { backgroundColor: field.value ? field.bg : Colors.borderLight },
+                      !field.value && styles.fieldRowEmpty,
+                    ]}
+                  >
                     <View style={styles.fieldRowRight}>
-                      <Text style={[
-                        styles.fieldRowLabel,
-                        { color: field.value ? field.color : Colors.textMuted }
-                      ]}>
+                      <Text
+                        style={[
+                          styles.fieldRowLabel,
+                          { color: field.value ? field.color : Colors.textMuted },
+                        ]}
+                      >
                         {field.label}
                       </Text>
-                      <Text style={[
-                        styles.fieldRowValue,
-                        { color: field.value ? field.color : Colors.textMuted }
-                      ]}>
+                      <Text
+                        style={[
+                          styles.fieldRowValue,
+                          { color: field.value ? field.color : Colors.textMuted },
+                        ]}
+                      >
                         {field.value ?? '—'}
                       </Text>
                     </View>

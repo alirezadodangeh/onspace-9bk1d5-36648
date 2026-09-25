@@ -16,6 +16,7 @@ import { Colors, Spacing, BorderRadius, FontSize, Shadow } from '@/constants/the
 import { useEntries, Entry } from '@/hooks/useEntries';
 import EntryCard from '@/components/EntryCard';
 import AddEntryModal from '@/components/AddEntryModal';
+import EditEntryModal from '@/components/EditEntryModal';
 import { ExtractedData } from '@/services/extractionService';
 
 type FlatItem =
@@ -36,24 +37,27 @@ function groupByDate(entries: Entry[]): { title: string; data: Entry[] }[] {
 }
 
 export default function HomeScreen() {
-  const { entries, loading, addEntry, deleteEntry } = useEntries();
+  const { entries, loading, addEntry, updateEntry, deleteEntry } = useEntries();
   const [modalVisible, setModalVisible] = useState(false);
+  const [editingEntry, setEditingEntry] = useState<Entry | null>(null);
 
   const handleSave = async (data: ExtractedData) => {
     await addEntry(data);
   };
 
-  const renderItem = ({ item }: { item: Entry }) => (
-    <EntryCard entry={item} onDelete={deleteEntry} />
-  );
+  const handleEdit = (entry: Entry) => {
+    setEditingEntry(entry);
+  };
+
+  const handleUpdate = async (id: string, changes: Partial<Entry>) => {
+    await updateEntry(id, changes);
+  };
 
   const renderHeader = () => {
     if (entries.length === 0) return null;
     return (
       <View style={styles.listHeader}>
-        <Text style={styles.totalText}>
-          {entries.length} آیتم ثبت‌شده
-        </Text>
+        <Text style={styles.totalText}>{entries.length} آیتم ثبت‌شده</Text>
       </View>
     );
   };
@@ -69,7 +73,6 @@ export default function HomeScreen() {
     </View>
   );
 
-  // Flatten grouped entries with section headers
   const flatData: FlatItem[] = [];
   const groups = groupByDate(entries);
   for (const group of groups) {
@@ -83,7 +86,13 @@ export default function HomeScreen() {
     if (item.type === 'header') {
       return renderSectionSeparator(item.date);
     }
-    return <EntryCard entry={item.entry} onDelete={deleteEntry} />;
+    return (
+      <EntryCard
+        entry={item.entry}
+        onDelete={deleteEntry}
+        onEdit={handleEdit}
+      />
+    );
   };
 
   return (
@@ -146,11 +155,19 @@ export default function HomeScreen() {
         <MaterialIcons name="add" size={32} color="#fff" />
       </Pressable>
 
-      {/* Modal */}
+      {/* Add Modal */}
       <AddEntryModal
         visible={modalVisible}
         onClose={() => setModalVisible(false)}
         onSave={handleSave}
+      />
+
+      {/* Edit Modal */}
+      <EditEntryModal
+        visible={editingEntry !== null}
+        entry={editingEntry}
+        onClose={() => setEditingEntry(null)}
+        onSave={handleUpdate}
       />
     </SafeAreaView>
   );

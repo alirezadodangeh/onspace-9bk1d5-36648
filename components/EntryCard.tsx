@@ -14,6 +14,7 @@ import { Entry } from '@/hooks/useEntries';
 interface Props {
   entry: Entry;
   onDelete: (id: string) => void;
+  onEdit: (entry: Entry) => void;
 }
 
 function formatAmount(amount: string): string {
@@ -22,7 +23,7 @@ function formatAmount(amount: string): string {
   return num.toLocaleString('fa-IR');
 }
 
-function EntryCard({ entry, onDelete }: Props) {
+function EntryCard({ entry, onDelete, onEdit }: Props) {
   const handleDelete = () => {
     Alert.alert('حذف', 'این آیتم حذف شود؟', [
       { text: 'انصراف', style: 'cancel' },
@@ -30,38 +31,64 @@ function EntryCard({ entry, onDelete }: Props) {
     ]);
   };
 
-  const hasContent = entry.date || entry.amount || entry.sayyadId || entry.name || entry.nationalCode;
+  const hasContent =
+    entry.date ||
+    entry.amount ||
+    entry.sayyadId ||
+    entry.name ||
+    entry.nationalCode ||
+    entry.checkSerial;
 
   return (
     <View style={styles.card}>
       {/* Header Row */}
       <View style={styles.headerRow}>
-        <View style={styles.headerLeft}>
-          {entry.date ? (
-            <View style={styles.dateBadge}>
-              <MaterialIcons name="event" size={14} color={Colors.primary} />
-              <Text style={styles.dateText}>{entry.date}</Text>
-            </View>
-          ) : (
-            <View style={[styles.dateBadge, styles.dateBadgeEmpty]}>
-              <MaterialIcons name="event" size={14} color={Colors.textMuted} />
-              <Text style={[styles.dateText, { color: Colors.textMuted }]}>تاریخ نامشخص</Text>
-            </View>
-          )}
+        <View style={styles.headerActions}>
+          <Pressable
+            style={({ pressed }) => [styles.actionBtn, styles.editBtn, pressed && { opacity: 0.6 }]}
+            onPress={() => onEdit(entry)}
+            hitSlop={8}
+          >
+            <MaterialIcons name="edit" size={16} color={Colors.primary} />
+          </Pressable>
+          <Pressable
+            style={({ pressed }) => [styles.actionBtn, styles.deleteBtn, pressed && { opacity: 0.6 }]}
+            onPress={handleDelete}
+            hitSlop={8}
+          >
+            <MaterialIcons name="delete-outline" size={16} color={Colors.error} />
+          </Pressable>
         </View>
-        <Pressable
-          style={({ pressed }) => [styles.deleteBtn, pressed && { opacity: 0.6 }]}
-          onPress={handleDelete}
-          hitSlop={8}
-        >
-          <MaterialIcons name="delete-outline" size={20} color={Colors.error} />
-        </Pressable>
+
+        {entry.date ? (
+          <View style={styles.dateBadge}>
+            <MaterialIcons name="event" size={14} color={Colors.primary} />
+            <Text style={styles.dateText}>{entry.date}</Text>
+          </View>
+        ) : (
+          <View style={[styles.dateBadge, styles.dateBadgeEmpty]}>
+            <MaterialIcons name="event" size={14} color={Colors.textMuted} />
+            <Text style={[styles.dateText, { color: Colors.textMuted }]}>تاریخ نامشخص</Text>
+          </View>
+        )}
       </View>
 
       {!hasContent ? (
         <Text style={styles.noDataText}>اطلاعاتی استخراج نشد</Text>
       ) : (
         <View style={styles.fieldsGrid}>
+          {entry.checkSerial ? (
+            <View style={[styles.fieldChip, { backgroundColor: Colors.checkLight }]}>
+              <MaterialIcons name="receipt-long" size={14} color={Colors.check} />
+              <View style={styles.fieldTexts}>
+                <Text style={[styles.fieldLabel, { color: Colors.check }]}>سریال چک</Text>
+                <Text style={[styles.fieldValue, { color: Colors.check }]}>
+                  {entry.checkSerial}
+                </Text>
+              </View>
+            </View>
+          ) : null}
+
           {entry.sayyadId ? (
             <View style={[styles.fieldChip, { backgroundColor: Colors.sayyadLight }]}>
               <MaterialIcons name="fingerprint" size={14} color={Colors.sayyad} />
@@ -139,10 +166,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: Spacing.sm,
   },
-  headerLeft: {
-    flexDirection: 'row-reverse',
-    alignItems: 'center',
+  headerActions: {
+    flexDirection: 'row',
     gap: Spacing.xs,
+  },
+  actionBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: BorderRadius.sm,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  editBtn: {
+    backgroundColor: Colors.accent,
+  },
+  deleteBtn: {
+    backgroundColor: Colors.errorLight,
   },
   dateBadge: {
     flexDirection: 'row-reverse',
@@ -161,9 +200,6 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: Colors.primary,
     letterSpacing: 0.5,
-  },
-  deleteBtn: {
-    padding: 4,
   },
   fieldsGrid: {
     gap: Spacing.xs,

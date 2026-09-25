@@ -24,6 +24,8 @@ export const Colors = {
   amountLight: '#F0FFF4',
   national: '#C05621',
   nationalLight: '#FFFAF0',
+  check: '#0694A2',
+  checkLight: '#ECFEFF',
   overlay: 'rgba(0,0,0,0.5)',
 };
 

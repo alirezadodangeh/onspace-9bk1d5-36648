@@ -10,6 +10,7 @@ export interface Entry {
   sayyadId: string | null;
   name: string | null;
   nationalCode: string | null;
+  checkSerial: string | null;
   rawText: string;
   createdAt: number;
 }
@@ -43,6 +44,14 @@ export function useEntries() {
     await saveEntries(updated);
   }, [entries]);
 
+  const updateEntry = useCallback(async (id: string, changes: Partial<Omit<Entry, 'id' | 'createdAt'>>) => {
+    const updated = entries.map((e) =>
+      e.id === id ? { ...e, ...changes } : e
+    );
+    setEntries(updated);
+    await saveEntries(updated);
+  }, [entries]);
+
   const sortedEntries = [...entries].sort((a, b) => {
     const aKey = a.date ? dateToSortKey(a.date) : 0;
     const bKey = b.date ? dateToSortKey(b.date) : 0;
@@ -54,6 +63,7 @@ export function useEntries() {
     entries: sortedEntries,
     loading,
     addEntry,
+    updateEntry,
     deleteEntry,
   };
 }

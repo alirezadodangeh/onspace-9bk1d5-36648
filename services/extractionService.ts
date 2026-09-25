@@ -6,6 +6,7 @@ export interface ExtractedData {
   sayyadId: string | null;
   name: string | null;
   nationalCode: string | null;
+  checkSerial: string | null;
   rawText: string;
 }
 
@@ -97,12 +98,23 @@ export function extractData(rawText: string): ExtractedData {
     }
   }
 
+  // --- Check Serial (e.g. 156/054770 — short/long digit pattern) ---
+  let checkSerial: string | null = null;
+  // Remove already-matched date portion to avoid false positives
+  const textWithoutDate = date ? text.replace(date.replace(/\//g, '\/'), '') : text;
+  const checkSerialRegex = /\b(\d{1,4})\/([0-9]{4,7})\b/;
+  const checkMatch = textWithoutDate.match(checkSerialRegex);
+  if (checkMatch) {
+    checkSerial = `${checkMatch[1]}/${checkMatch[2]}`;
+  }
+
   return {
     date,
     amount,
     sayyadId,
     name,
     nationalCode,
+    checkSerial,
     rawText,
   };
 }
