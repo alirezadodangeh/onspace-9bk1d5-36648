@@ -1,5 +1,5 @@
 // Powered by OnSpace.AI
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Text,
@@ -24,19 +24,86 @@ interface Props {
   onSave: (data: ExtractedData) => void;
 }
 
-interface PreviewField {
+interface FieldConfig {
+  key: keyof Omit<ExtractedData, 'rawText'>;
   label: string;
-  value: string | null;
   icon: IconName;
   color: string;
   bg: string;
+  placeholder: string;
+  keyboardType?: 'default' | 'numeric';
 }
+
+const FIELDS: FieldConfig[] = [
+  {
+    key: 'date',
+    label: 'تاریخ شمسی',
+    icon: 'event',
+    color: Colors.primary,
+    bg: Colors.accent,
+    placeholder: '1405/06/10',
+  },
+  {
+    key: 'checkSerial',
+    label: 'سریال چک',
+    icon: 'receipt-long',
+    color: Colors.check,
+    bg: Colors.checkLight,
+    placeholder: '156/054770',
+  },
+  {
+    key: 'amount',
+    label: 'مبلغ',
+    icon: 'payments',
+    color: Colors.amount,
+    bg: Colors.amountLight,
+    placeholder: '5,000,000',
+    keyboardType: 'numeric',
+  },
+  {
+    key: 'sayyadId',
+    label: 'شناسه صیاد (۱۶ رقم)',
+    icon: 'fingerprint',
+    color: Colors.sayyad,
+    bg: Colors.sayyadLight,
+    placeholder: '1234567890123456',
+    keyboardType: 'numeric',
+  },
+  {
+    key: 'name',
+    label: 'نام',
+    icon: 'person-outline',
+    color: Colors.primary,
+    bg: Colors.accent,
+    placeholder: 'علی رضایی',
+  },
+  {
+    key: 'nationalCode',
+    label: 'کد ملی (۱۰ رقم)',
+    icon: 'credit-card',
+    color: Colors.national,
+    bg: Colors.nationalLight,
+    placeholder: '0012345678',
+    keyboardType: 'numeric',
+  },
+];
 
 export default function AddEntryModal({ visible, onClose, onSave }: Props) {
   const [text, setText] = useState('');
   const [extracted, setExtracted] = useState<ExtractedData | null>(null);
+  const [editForm, setEditForm] = useState<Record<string, string>>({});
   const [processing, setProcessing] = useState(false);
   const inputRef = useRef<TextInput>(null);
+
+  useEffect(() => {
+    if (extracted) {
+      const form: Record<string, string> = {};
+      FIELDS.forEach((f) => {
+        form[f.key] = (extracted[f.key] as string | null) ?? '';
+      });
+      setEditForm(form);
+    }
+  }, [extracted]);
 
   const handleExtract = () => {
     if (!text.trim()) return;
@@ -50,76 +117,28 @@ export default function AddEntryModal({ visible, onClose, onSave }: Props) {
 
   const handleSave = () => {
     if (!extracted) return;
-    onSave(extracted);
+    const finalData: ExtractedData = {
+      rawText: extracted.rawText,
+      date: editForm['date']?.trim() || null,
+      checkSerial: editForm['checkSerial']?.trim() || null,
+      amount: editForm['amount']?.trim() || null,
+      sayyadId: editForm['sayyadId']?.trim() || null,
+      name: editForm['name']?.trim() || null,
+      nationalCode: editForm['nationalCode']?.trim() || null,
+    };
+    onSave(finalData);
     handleClose();
   };
 
   const handleClose = () => {
     setText('');
     setExtracted(null);
+    setEditForm({});
     setProcessing(false);
     onClose();
   };
 
-  const fields: PreviewField[] = extracted
-    ? [
-        {
-          label: 'تاریخ شمسی',
-          value: extracted.date,
-          icon: 'event',
-          color: Colors.primary,
-          bg: Colors.accent,
-        },
-        {
-          label: 'سریال چک',
-          value: extracted.checkSerial,
-          icon: 'receipt-long',
-          color: Colors.check,
-          bg: Colors.checkLight,
-        },
-        {
-          label: 'مبلغ',
-          value: extracted.amount
-            ? parseInt(extracted.amount.replace(/,/g, ''), 10).toLocaleString('fa-IR') + ' ریال'
-            : null,
-          icon: 'payments',
-          color: Colors.amount,
-          bg: Colors.amountLight,
-        },
-        {
-          label: 'شناسه صیاد (۱۶ رقم)',
-          value: extracted.sayyadId,
-          icon: 'fingerprint',
-          color: Colors.sayyad,
-          bg: Colors.sayyadLight,
-        },
-        {
-          label: 'نام',
-          value: extracted.name,
-          icon: 'person-outline',
-          color: Colors.primary,
-          bg: Colors.accent,
-        },
-        {
-          label: 'کد ملی (۱۰ رقم)',
-          value: extracted.nationalCode,
-          icon: 'credit-card',
-          color: Colors.national,
-          bg: Colors.nationalLight,
-        },
-      ]
-    : [];
-
-  const foundCount = extracted
-    ? [
-        extracted.date,
-        extracted.amount,
-        extracted.sayyadId,
-        extracted.checkSerial,
-        extracted.name,
-        extracted.nationalCode,
-      ].filter(Boolean).length
-    : 0;
+  const foundCount = FIELDS.filter((f) => !!editForm[f.key]?.trim()).length;
 
   return (
     <Modal
@@ -135,7 +154,6 @@ export default function AddEntryModal({ visible, onClose, onSave }: Props) {
         <Pressable style={styles.backdrop} onPress={handleClose} />
 
         <View style={styles.sheet}>
-          {/* Handle */}
           <View style={styles.handle} />
 
           {/* Header */}
@@ -163,7 +181,10 @@ export default function AddEntryModal({ visible, onClose, onSave }: Props) {
               value={text}
               onChangeText={(t) => {
                 setText(t);
-                if (extracted) setExtracted(null);
+                if (extracted) {
+                  setExtracted(null);
+                  setEditForm({});
+                }
               }}
               placeholder="متن شامل تاریخ، مبلغ، شناسه صیاد، سریال چک و... را اینجا بنویسید یا بچسبانید"
               placeholderTextColor={Colors.textMuted}
@@ -194,9 +215,10 @@ export default function AddEntryModal({ visible, onClose, onSave }: Props) {
               </Text>
             </Pressable>
 
-            {/* Extracted Preview */}
+            {/* Editable Preview */}
             {extracted ? (
               <View style={styles.preview}>
+                {/* Preview Header */}
                 <View style={styles.previewHeader}>
                   <View
                     style={[
@@ -221,43 +243,68 @@ export default function AddEntryModal({ visible, onClose, onSave }: Props) {
                       {foundCount > 0 ? `${foundCount} فیلد یافت شد` : 'فیلدی یافت نشد'}
                     </Text>
                   </View>
-                  <Text style={styles.previewTitle}>پیش‌نمایش</Text>
+                  <View style={styles.previewTitleRow}>
+                    <MaterialIcons name="edit-note" size={16} color={Colors.textSecondary} />
+                    <Text style={styles.previewTitle}>ویرایش و ذخیره</Text>
+                  </View>
                 </View>
 
-                {fields.map((field) => (
-                  <View
-                    key={field.label}
-                    style={[
-                      styles.fieldRow,
-                      { backgroundColor: field.value ? field.bg : Colors.borderLight },
-                      !field.value && styles.fieldRowEmpty,
-                    ]}
-                  >
-                    <View style={styles.fieldRowRight}>
-                      <Text
+                {/* Editable Fields */}
+                {FIELDS.map((field) => {
+                  const hasValue = !!editForm[field.key]?.trim();
+                  return (
+                    <View key={field.key} style={styles.fieldWrap}>
+                      <View style={styles.fieldLabelRow}>
+                        <MaterialIcons
+                          name={field.icon}
+                          size={14}
+                          color={hasValue ? field.color : Colors.textMuted}
+                        />
+                        <Text
+                          style={[
+                            styles.fieldLabel,
+                            { color: hasValue ? field.color : Colors.textMuted },
+                          ]}
+                        >
+                          {field.label}
+                        </Text>
+                        {hasValue ? (
+                          <MaterialIcons
+                            name="check-circle"
+                            size={13}
+                            color={field.color}
+                            style={styles.fieldCheck}
+                          />
+                        ) : null}
+                      </View>
+                      <TextInput
                         style={[
-                          styles.fieldRowLabel,
-                          { color: field.value ? field.color : Colors.textMuted },
+                          styles.fieldInput,
+                          hasValue
+                            ? {
+                                borderColor: field.color + '66',
+                                backgroundColor: field.bg,
+                                color: field.color,
+                              }
+                            : {
+                                borderColor: Colors.border,
+                                backgroundColor: Colors.background,
+                                color: Colors.textMuted,
+                              },
                         ]}
-                      >
-                        {field.label}
-                      </Text>
-                      <Text
-                        style={[
-                          styles.fieldRowValue,
-                          { color: field.value ? field.color : Colors.textMuted },
-                        ]}
-                      >
-                        {field.value ?? '—'}
-                      </Text>
+                        value={editForm[field.key] ?? ''}
+                        onChangeText={(v) =>
+                          setEditForm((prev) => ({ ...prev, [field.key]: v }))
+                        }
+                        placeholder={field.placeholder}
+                        placeholderTextColor={Colors.textMuted}
+                        textAlign="right"
+                        keyboardType={field.keyboardType ?? 'default'}
+                        returnKeyType="next"
+                      />
                     </View>
-                    <MaterialIcons
-                      name={field.value ? 'check-circle' : 'radio-button-unchecked'}
-                      size={18}
-                      color={field.value ? field.color : Colors.border}
-                    />
-                  </View>
-                ))}
+                  );
+                })}
 
                 {/* Save Button */}
                 <Pressable
@@ -270,7 +317,7 @@ export default function AddEntryModal({ visible, onClose, onSave }: Props) {
               </View>
             ) : null}
 
-            <View style={{ height: 40 }} />
+            <View style={{ height: 48 }} />
           </ScrollView>
         </View>
       </KeyboardAvoidingView>
@@ -291,7 +338,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.surface,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
-    maxHeight: '90%',
+    maxHeight: '92%',
     ...Shadow.lg,
   },
   handle: {
@@ -334,7 +381,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: Colors.border,
     padding: Spacing.md,
-    minHeight: 140,
+    minHeight: 130,
     fontSize: FontSize.md,
     color: Colors.textPrimary,
     lineHeight: 26,
@@ -359,15 +406,21 @@ const styles = StyleSheet.create({
     fontSize: FontSize.md,
     fontWeight: '700',
   },
+  // Preview section
   preview: {
     marginTop: Spacing.md,
-    gap: Spacing.xs,
+    gap: Spacing.xs + 2,
   },
   previewHeader: {
     flexDirection: 'row-reverse',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: Spacing.xs,
+  },
+  previewTitleRow: {
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    gap: 4,
   },
   previewTitle: {
     fontSize: FontSize.md,
@@ -386,32 +439,34 @@ const styles = StyleSheet.create({
     fontSize: FontSize.xs,
     fontWeight: '600',
   },
-  fieldRow: {
+  // Editable field
+  fieldWrap: {
+    gap: 5,
+  },
+  fieldLabelRow: {
     flexDirection: 'row-reverse',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    borderRadius: BorderRadius.sm + 2,
+    gap: 4,
+  },
+  fieldLabel: {
+    fontSize: FontSize.xs,
+    fontWeight: '600',
+    flex: 1,
+    textAlign: 'right',
+  },
+  fieldCheck: {
+    marginLeft: 2,
+  },
+  fieldInput: {
+    borderRadius: BorderRadius.md,
+    borderWidth: 1.5,
     paddingHorizontal: Spacing.sm + 4,
     paddingVertical: Spacing.sm,
-    gap: Spacing.xs,
-  },
-  fieldRowEmpty: {
-    opacity: 0.6,
-  },
-  fieldRowRight: {
-    alignItems: 'flex-end',
-    flex: 1,
-  },
-  fieldRowLabel: {
-    fontSize: FontSize.xs,
-    fontWeight: '500',
-    opacity: 0.8,
-  },
-  fieldRowValue: {
     fontSize: FontSize.sm,
-    fontWeight: '700',
-    marginTop: 2,
+    fontWeight: '600',
+    textAlign: 'right',
   },
+  // Save
   saveBtn: {
     flexDirection: 'row-reverse',
     alignItems: 'center',
