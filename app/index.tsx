@@ -7,8 +7,8 @@ import {
   FlatList,
   Pressable,
   ActivityIndicator,
-  StatusBar,
 } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
@@ -97,7 +97,7 @@ export default function HomeScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea} edges={['top']}>
-      <StatusBar barStyle="light-content" backgroundColor={Colors.primaryDark} />
+      <StatusBar style="light" />
 
       {/* Header */}
       <View style={styles.appHeader}>
